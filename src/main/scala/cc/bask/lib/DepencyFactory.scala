@@ -6,6 +6,7 @@ import http._
 import util._
 import common._
 import _root_.java.util.Date
+import service.LanguageServiceImpl
 
 /**
  * A factory for generating new instances of Date.  You can create
@@ -16,6 +17,7 @@ import _root_.java.util.Date
  */
 object DependencyFactory extends Factory {
   implicit object time extends FactoryMaker(Helpers.now _)
+  implicit object language extends FactoryMaker(new LanguageServiceImpl())
 
   /**
    * objects in Scala are lazily created.  The init()
@@ -24,7 +26,7 @@ object DependencyFactory extends Factory {
    * registering their types with the dependency injector
    */
   private def init() {
-    List(time)
+    List(time, language)
   }
   init()
 }
