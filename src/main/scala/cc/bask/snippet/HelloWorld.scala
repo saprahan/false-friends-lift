@@ -9,9 +9,9 @@ import cc.bask.lib._
 import Helpers._
 import service.LanguageService
 import com.google.inject.Inject
-import injection.ServiceInjector
+import injection.Injection
 
-class HelloWorld extends ServiceInjector {
+class HelloWorld extends Injection {
 
   @Inject private var languageService: LanguageService = _
 

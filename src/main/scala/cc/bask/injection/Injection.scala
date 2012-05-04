@@ -1,12 +1,12 @@
 package cc.bask.injection
 
-import com.google.inject.{AbstractModule, Guice}
+import com.google.inject.Guice
 
-trait ServiceInjector {
-  ServiceInjector.inject(this)
+trait Injection {
+  Injection.inject(this)
 }
 
-object ServiceInjector {
+object Injection {
   private val injector = Guice.createInjector(new InjectionConfig)
 
   def inject(obj: AnyRef) = injector.injectMembers(obj)

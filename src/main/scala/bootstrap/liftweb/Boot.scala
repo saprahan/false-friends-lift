@@ -6,10 +6,12 @@ import _root_.net.liftweb.http._
 import _root_.net.liftweb.http.provider._
 import _root_.net.liftweb.sitemap._
 import _root_.net.liftweb.sitemap.Loc._
-import Helpers._
-import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, StandardDBVendor}
-import _root_.java.sql.{Connection, DriverManager}
+import _root_.net.liftweb.mapper.{DB, Schemifier, DefaultConnectionIdentifier, StandardDBVendor}
 import _root_.cc.bask.model._
+import cc.bask.squeryl.DatabaseSchema
+import org.squeryl.adapters.H2Adapter
+import net.liftweb.squerylrecord.SquerylRecord
+import scala.util.control.Exception.ultimately
 
 
 /**
@@ -18,6 +20,9 @@ import _root_.cc.bask.model._
  */
 class Boot {
   def boot {
+    DatabaseSchema
+    DefaultConnectionIdentifier.jndiName = "jdbc/FalseFriendsDS"
+
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor = 
 	new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
@@ -29,6 +34,8 @@ class Boot {
 
       DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     }
+
+    SquerylRecord.init(() => new H2Adapter)
 
     // where to search snippet
     LiftRules.addToPackages("cc.bask")
@@ -59,7 +66,10 @@ class Boot {
 
     LiftRules.loggedInTest = Full(() => User.loggedIn_?)
 
-    S.addAround(DB.buildLoanWrapper)
+    S.addAround(DB.buildLoanWrapper(DefaultConnectionIdentifier::Nil))
+    S.addAround(new LoanWrapper {
+      def apply[T](f: => T): T = ultimately(println(S.getAllNotices))(f)
+    })
   }
 
   /**
